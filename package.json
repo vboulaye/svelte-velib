@@ -4,11 +4,13 @@
   "devDependencies": {
     "cross-env": "^5.2.0",
     "css-loader": "^2.1.1",
+    "file-loader": "^3.0.1",
     "mini-css-extract-plugin": "^0.6.0",
     "serve": "^11.0.0",
     "style-loader": "^0.23.1",
     "svelte": "^3.0.0",
     "svelte-loader": "2.13.3",
+    "url-loader": "^1.1.2",
     "webpack": "^4.30.0",
     "webpack-cli": "^3.3.0",
     "webpack-dev-server": "^3.3.1"
@@ -16,5 +18,11 @@
   "scripts": {
     "build": "cross-env NODE_ENV=production webpack",
     "dev": "webpack-dev-server --content-base public"
+  },
+  "dependencies": {
+    "@fortawesome/fontawesome-free": "^5.8.2",
+    "leaflet": "^1.4.0",
+    "leaflet-control-geocoder": "^1.7.0",
+    "leaflet.locatecontrol": "^0.66.2"
   }
 }
