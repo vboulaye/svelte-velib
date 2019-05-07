@@ -1,6 +1,8 @@
 import * as L from 'leaflet'
 import 'leaflet.locatecontrol'
 import 'leaflet-control-geocoder'
+import 'leaflet.markercluster'
+import 'leaflet-layerjson'
 
 // hack to repair the marker links from leaflet pssing through webpack
 // https://github.com/Leaflet/Leaflet/issues/4968
@@ -14,9 +16,10 @@ L.Icon.Default.mergeOptions({
   shadowUrl: require('leaflet/dist/images/marker-shadow.png'),
 });
 
-/// and hack
+/// end hack
 
-export function mapBuilder (id) {
+
+export function VelibMap (id) {
 
   const map = L.map(id)
 
@@ -100,5 +103,39 @@ export function mapBuilder (id) {
   map.options.minZoom = 11
   map.options.maxBoundsViscosity = 1.0
 
-  return map
+  var markersCluster = L.markerClusterGroup();
+  map.addLayer(markersCluster);
+
+
+  const layerJSON = L.layerJSON({
+    url: 'https://www.velib-metropole.fr/webapi/map/details' +
+      '?gpsTopLatitude={lat2}'+
+      '&gpsTopLongitude={lon2}'+
+      '&gpsBotLatitude={lat1}' +
+      '&gpsBotLongitude={lon1}'+
+      '&zoomLevel=13',
+    propertyLoc: ['station.gps.latitude','station.gps.longitude'],
+    propertyTitle: 'station.name',
+    caching: true,
+    cacheId: function(data, latlng) {
+      return data.station.code || latlng.toString();
+    },
+    layerTarget:markersCluster,
+    //minShift: Infinity,
+    // caching: true,
+    // buildPopup: function(data) {
+    //   return L.Util.template("<h3>{name}</h3> {data}", {
+    //     name: data.name,
+    //     data: (function() {
+    //       var out = '';
+    //       for(var i=0;i<data.population.length;i++)
+    //         out += L.Util.template(popupTmpl,data.population[i]);
+    //       return out;
+    //     }())
+    //   });
+    // }
+  })
+  map.addLayer(layerJSON)
+
+  return {map, markersCluster}
 }

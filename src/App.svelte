@@ -1,6 +1,6 @@
 <script>
   import { onMount } from 'svelte'
-  import { mapBuilder } from './map/mapBuilder'
+  import { VelibMap } from './map/VelibMap'
 
   const markers = {}
 
@@ -12,13 +12,17 @@
     const lat = urlParams.get('lat') || 48.86
     const lon = urlParams.get('lon') || 2.34
 
-    const map = mapBuilder('map').setView([lat, lon], zoom)
+    const velibMap = new VelibMap('map')
+    velibMap.map.setView([lat, lon], zoom)
 
-    refresh(map)
+    // velibMap.map.on('moveend', () => refresh(velibMap))
+    // velibMap.map.on('zoomend', () => refresh(velibMap))
+    // refresh(velibMap)
 
   })
 
-  const refresh = (map) => {
+  const refresh = (velibMap) => {
+    const map = velibMap.map
     const velibStationUrl = 'https://www.velib-metropole.fr/webapi/map/details' +
       '?gpsTopLatitude=' + map.getBounds().getNorth() +
       '&gpsTopLongitude=' + map.getBounds().getEast() +
@@ -27,31 +31,38 @@
       '&zoomLevel=' + map.getZoom()
     console.log('calling url: ' + velibStationUrl)
 
-    fetch(velibStationUrl)
+    return  fetch(velibStationUrl)
       .then(response => response.json())
       .then(stationStates => {
         // sync back the global station map
         stationStates.forEach(function (stationState) {
-          if (markers[stationState.station.code]) {
-            markers[key].visible = true
+          const code = stationState.station.code
+          if (markers[code]) {
+            markers[code].visible = true
           } else {
             const gps = stationState.station.gps
             const marker = L.marker([gps.latitude, gps.longitude])
-            marker.addTo(map)
-            marker.visible=true
-            markers[stationState.station.code] = marker
+//            marker.addTo(map)
+            marker.visible = true
+            markers[code] = marker
           }
 
         })
 
+        const visibleMarkers = []
+        const hiddenMarkers = []
         Object.keys(markers).forEach(function (key) {
           const marker = markers[key]
-          if (markers[key].visible) {
-            delete markers[key].visible
+          if (marker.visible) {
+            delete marker.visible
+            visibleMarkers.push(marker)
           } else {
-            map.removeLayer(markers[key])
+            hiddenMarkers.push(marker)
           }
         })
+
+        velibMap.markersCluster.addLayers(visibleMarkers)
+        velibMap.markersCluster.removeLayers(hiddenMarkers)
 
       })
 
@@ -64,6 +75,8 @@
     @import '~@fortawesome/fontawesome-free/css/all.css';
     @import '~leaflet.locatecontrol/dist/L.Control.Locate.css';
     @import '~leaflet-control-geocoder/dist/Control.Geocoder.css';
+    @import '~leaflet.markercluster/dist/MarkerCluster.css';
+    @import '~leaflet.markercluster/dist/MarkerCluster.Default.css';
 
     #map {
         height: 100%;
