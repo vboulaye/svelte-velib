@@ -2,18 +2,60 @@
   import { onMount } from 'svelte'
   import { mapBuilder } from './map/mapBuilder'
 
+  const markers = {}
+
   onMount(() => {
 
     const urlParams = new URLSearchParams(window.location.search)
 
-    const zoom = urlParams.get('zoom') || 13
+    const zoom = urlParams.get('zoom') || 17
     const lat = urlParams.get('lat') || 48.86
     const lon = urlParams.get('lon') || 2.34
 
     const map = mapBuilder('map').setView([lat, lon], zoom)
 
+    refresh(map)
+
   })
-  //link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+
+  const refresh = (map) => {
+    const velibStationUrl = 'https://www.velib-metropole.fr/webapi/map/details' +
+      '?gpsTopLatitude=' + map.getBounds().getNorth() +
+      '&gpsTopLongitude=' + map.getBounds().getEast() +
+      '&gpsBotLatitude=' + map.getBounds().getSouth() +
+      '&gpsBotLongitude=' + map.getBounds().getWest() +
+      '&zoomLevel=' + map.getZoom()
+    console.log('calling url: ' + velibStationUrl)
+
+    fetch(velibStationUrl)
+      .then(response => response.json())
+      .then(stationStates => {
+        // sync back the global station map
+        stationStates.forEach(function (stationState) {
+          if (markers[stationState.station.code]) {
+            markers[key].visible = true
+          } else {
+            const gps = stationState.station.gps
+            const marker = L.marker([gps.latitude, gps.longitude])
+            marker.addTo(map)
+            marker.visible=true
+            markers[stationState.station.code] = marker
+          }
+
+        })
+
+        Object.keys(markers).forEach(function (key) {
+          const marker = markers[key]
+          if (markers[key].visible) {
+            delete markers[key].visible
+          } else {
+            map.removeLayer(markers[key])
+          }
+        })
+
+      })
+
+  }
 
 </script>
 

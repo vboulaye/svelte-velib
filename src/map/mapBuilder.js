@@ -1,9 +1,22 @@
-
 import * as L from 'leaflet'
 import 'leaflet.locatecontrol'
 import 'leaflet-control-geocoder'
 
-export function mapBuilder(id) {
+// hack to repair the marker links from leaflet pssing through webpack
+// https://github.com/Leaflet/Leaflet/issues/4968
+// import 'leaflet/dist/leaflet.css';
+
+delete L.Icon.Default.prototype._getIconUrl;
+
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: require('leaflet/dist/images/marker-icon-2x.png'),
+  iconUrl: require('leaflet/dist/images/marker-icon.png'),
+  shadowUrl: require('leaflet/dist/images/marker-shadow.png'),
+});
+
+/// and hack
+
+export function mapBuilder (id) {
 
   const map = L.map(id)
 
@@ -12,30 +25,30 @@ export function mapBuilder(id) {
     attribution: '<a href="https://wikimediafoundation.org/wiki/Maps_Terms_of_Use">Wikimedia</a>',
     minZoom: 1,
     maxZoom: 19
-  });
-  wikimediaLayer.addTo(map);
+  })
+  wikimediaLayer.addTo(map)
 
 // OpenStreetMap
   const osmLayer = L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
     attribution: '&copy; <a href="https://osm.org/copyright">OpenStreetMap</a> contributors',
     maxZoom: 18
-  });
+  })
 
 // Satellite layer
   var satelliteLayer = L.tileLayer('http://services.arcgisonline.com/arcgis/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
     attribution: 'ESRI'
   })
 
-  const mapLink = '<a href="http://openstreetmap.org">OpenStreetMap</a>';
-  const ocmlink = '<a href="http://thunderforest.com/">Thunderforest</a>';
+  const mapLink = '<a href="http://openstreetmap.org">OpenStreetMap</a>'
+  const ocmlink = '<a href="http://thunderforest.com/">Thunderforest</a>'
   const openCycleLayer = L.tileLayer(
     'http://{s}.tile.thunderforest.com/cycle/{z}/{x}/{y}.png', {
-      attribution: '&copy; '+mapLink+' Contributors & '+ocmlink,
+      attribution: '&copy; ' + mapLink + ' Contributors & ' + ocmlink,
       maxZoom: 18,
     })
 
   // Public Transport
-  const transportLayer = L.tileLayer('http://openptmap.org/tiles/{z}/{x}/{y}.png',{
+  const transportLayer = L.tileLayer('http://openptmap.org/tiles/{z}/{x}/{y}.png', {
     attribution: '&copy; <a href="http://openptmap.org/" target="_blank" rel="noopener noreferrer">OpenPTMap</a> / <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OSM Contributors</a>',
     maxZoom: 22,
   })
@@ -48,39 +61,44 @@ export function mapBuilder(id) {
 
   L.control.layers(
     {
-      'wikimedia' : wikimediaLayer,
-      'OpenStreetMap' : osmLayer,
+      'wikimedia': wikimediaLayer,
+      'OpenStreetMap': osmLayer,
       'Satellite': satelliteLayer,
-      'OpenCycleMap' : openCycleLayer,
+      'OpenCycleMap': openCycleLayer,
     },
     {
-       'Transport' : transportLayer,
+      'Transport': transportLayer,
       // 'Station' : stationLayerGroup,
       // 'Isochrones': isochrones,
       // 'Bars' : barsLayer(),
-       'Temperature': tempLayer,
-       'Precipitation': precipitationLayer,
+      'Temperature': tempLayer,
+      'Precipitation': precipitationLayer,
       // 'Time dimension': timeDimensionHeatmap,
     }
   ).addTo(map)
-
 
   //add geolocation control
   L.control.locate({
     position: 'topleft',
     strings: {
-      title: "where am i?"
+      title: 'where am i?'
     },
     locateOptions: {
       maxZoom: 16,
       enableHighAccuracy: true
     }
-  }).addTo(map);
-
+  }).addTo(map)
 
   // add search by address
   L.Control.geocoder()
-    .addTo(map);
+    .addTo(map)
+
+  // set map area limits
+  const southWest = L.latLng(48.74, 2.14)
+  const northEast = L.latLng(48.98, 2.55)
+  map.setMaxBounds(L.latLngBounds(southWest, northEast))
+  map.options.minZoom = 11
+  map.options.maxBoundsViscosity = 1.0
 
   return map
 }
