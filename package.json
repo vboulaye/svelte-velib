@@ -24,6 +24,7 @@
   "dependencies": {
     "@fortawesome/fontawesome-free": "^5.8.2",
     "leaflet": "^1.4.0",
+    "leaflet-control-custom": "^1.0.0",
     "leaflet-control-geocoder": "^1.7.0",
     "leaflet-layerjson": "^0.3.1",
     "leaflet.locatecontrol": "^0.66.2",

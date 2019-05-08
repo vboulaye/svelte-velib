@@ -8,6 +8,29 @@ body {
 	margin: 0;
 }
 
+.velib-marker {
+	border-radius: 10px;
+	border: 2px solid #2074b6;
+	background-color: #fafafa;
+	padding: 0 5px;
+	text-align: justify;
+	font-size: 1.17em;
+	font-weight: bold;
+}
+.velib-marker-green {
+	color: green;
+	display: block;
+}
+.velib-marker-orange {
+	color: orangered;
+	display: block;
+}
+.velib-marker-red {
+	color: red;
+	display: block;
+}
+
+
 /*body {*/
 	/*color: #333;*/
 	/*margin: 0;*/

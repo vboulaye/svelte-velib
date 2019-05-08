@@ -3,21 +3,21 @@ import 'leaflet.locatecontrol'
 import 'leaflet-control-geocoder'
 import 'leaflet.markercluster'
 import 'leaflet-layerjson'
+import 'leaflet-control-custom'
 
 // hack to repair the marker links from leaflet pssing through webpack
 // https://github.com/Leaflet/Leaflet/issues/4968
 // import 'leaflet/dist/leaflet.css';
 
-delete L.Icon.Default.prototype._getIconUrl;
+delete L.Icon.Default.prototype._getIconUrl
 
 L.Icon.Default.mergeOptions({
   iconRetinaUrl: require('leaflet/dist/images/marker-icon-2x.png'),
   iconUrl: require('leaflet/dist/images/marker-icon.png'),
   shadowUrl: require('leaflet/dist/images/marker-shadow.png'),
-});
+})
 
 /// end hack
-
 
 export function VelibMap (id) {
 
@@ -102,54 +102,57 @@ export function VelibMap (id) {
   map.setMaxBounds(L.latLngBounds(southWest, northEast))
   map.options.minZoom = 11
   map.options.maxBoundsViscosity = 1.0
-  new L.Icon.Default();
-  var markersCluster = L.markerClusterGroup();
-  map.addLayer(markersCluster);
+  new L.Icon.Default()
+  var markersCluster = L.markerClusterGroup()
+  map.addLayer(markersCluster)
 
+  // loading bloc
+  const loader = L.DomUtil.get('loader');
 
   const layerJSON = L.layerJSON({
     url: 'https://www.velib-metropole.fr/webapi/map/details' +
-      '?gpsTopLatitude={lat2}'+
-      '&gpsTopLongitude={lon2}'+
+      '?gpsTopLatitude={lat2}' +
+      '&gpsTopLongitude={lon2}' +
       '&gpsBotLatitude={lat1}' +
-      '&gpsBotLongitude={lon1}'+
+      '&gpsBotLongitude={lon1}' +
       '&zoomLevel=13',
-    propertyLoc: ['station.gps.latitude','station.gps.longitude'],
+    propertyLoc: ['station.gps.latitude', 'station.gps.longitude'],
     propertyTitle: 'station.name',
     caching: true,
-    cacheId: function(data, latlng) {
-      return data.station.code || latlng.toString();
+    cacheId: function (data, latlng) {
+      return data.station.code || latlng.toString()
     },
-    layerTarget:markersCluster,
+    layerTarget: markersCluster,
     minZoom: 11, // distance in metter to trigger a refresh call
     minShift: 100, // distance in metter to trigger a refresh call
     updateOutBounds: true, // only refresh when move outside of bounds
-    buildIcon: function(data) {
-     // L.Icon.Default();
-      const computeColorClass= (qty) => {
-        if (qty<3) {
+    buildIcon: function (data) {
+      // L.Icon.Default();
+      const computeColorClass = (qty) => {
+        if (qty < 3) {
           return 'velib-marker-red'
         }
-        if (qty<5) {
+        if (qty < 5) {
           return 'velib-marker-orange'
         }
         return 'velib-marker-green'
       }
-      const opts =  {
+      const opts = {
         ...data,
         ...{
-          name:data.station.name,
-          nbSlots: Math.min(99,data.nbEDock+data.nbEDock),
+          name: data.station.name,
+          nbSlots: Math.min(99, data.nbEDock + data.nbEDock),
           colorBike: computeColorClass(data.nbBike),
           colorEbike: computeColorClass(data.nbEbike),
-          colorSlots: computeColorClass(data.nbEDock+data.nbEDock),
-        }}
+          colorSlots: computeColorClass(data.nbEDock + data.nbEDock),
+        }
+      }
       return L.divIcon({
-        html: L.Util.template("<div class='velib-marker'>" +
-          "<span class='{colorBike}'><i class='fas fa-fw fa-bicycle'></i>&nbsp;{nbBike}</span>" +
-          "<span class='{colorEbike}'><i class='fas fa-fw fa-motorcycle'></i>&nbsp;{nbEbike}</span>" +
-          "<span class='{colorSlots}'><i class='fas fa-fw fa-parking'></i>&nbsp;{nbSlots}</span>" +
-          "</div>", opts),
+        html: L.Util.template('<div class=\'velib-marker\'>' +
+          '<span class=\'{colorBike}\'><i class=\'fas fa-fw fa-bicycle\'></i>&nbsp;{nbBike}</span>' +
+          '<span class=\'{colorEbike}\'><i class=\'fas fa-fw fa-motorcycle\'></i>&nbsp;{nbEbike}</span>' +
+          '<span class=\'{colorSlots}\'><i class=\'fas fa-fw fa-parking\'></i>&nbsp;{nbSlots}</span>' +
+          '</div>', opts),
         iconSize: [52, 52],
         className: 'velib-station-marker'
       })
@@ -166,7 +169,34 @@ export function VelibMap (id) {
     //     }});
     //}
   })
+    .on('dataloading',function(e) {
+      loader.style.display = 'block';
+    })
+    .on('dataloaded',function(e) {
+      loader.style.display = 'none';
+    })
   map.addLayer(layerJSON)
 
-  return {map, markersCluster}
+  L.control.custom({
+    position: 'topleft',
+    title: 'refresh',
+    content : '<a class="leaflet-bar-part leaflet-bar-part-single" title="refresh"><i class="fas fa-sync-alt"></i></a>',
+    classes : 'leaflet-control-locate leaflet-bar leaflet-control',
+    style:
+      {
+        //margin: '10px',
+        padding: '0',
+        cursor: 'pointer',
+      },
+    events:
+      {
+        click: function(data)
+        {
+          layerJSON.update()
+        },
+      }
+  })
+    .addTo(map)
+
+  return { map, markersCluster }
 }

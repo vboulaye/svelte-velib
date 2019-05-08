@@ -32,8 +32,30 @@
         width: 100vw;
     }
 
-
-
+    #loader {
+        display: none;
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 999;
+    }
+    .center-container {
+        width: 60px;
+        height: 60px;
+        font-size: 60px;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        margin-top: -30px;
+        margin-right: 0;
+        margin-bottom: 0;
+        margin-left: -30px;
+        z-index: -1;
+    }
 </style>
 
 <svelte:head>
@@ -41,3 +63,8 @@
 </svelte:head>
 
 <div id="map"></div>
+<div id="loader" >
+    <div class="center-container">
+        <i class="fa fa-sync-alt fa-spin"></i>
+    </div>
+</div>
