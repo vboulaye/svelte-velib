@@ -102,7 +102,7 @@ export function VelibMap (id) {
   map.setMaxBounds(L.latLngBounds(southWest, northEast))
   map.options.minZoom = 11
   map.options.maxBoundsViscosity = 1.0
-
+  new L.Icon.Default();
   var markersCluster = L.markerClusterGroup();
   map.addLayer(markersCluster);
 
@@ -121,19 +121,50 @@ export function VelibMap (id) {
       return data.station.code || latlng.toString();
     },
     layerTarget:markersCluster,
-    //minShift: Infinity,
-    // caching: true,
+    minZoom: 11, // distance in metter to trigger a refresh call
+    minShift: 100, // distance in metter to trigger a refresh call
+    updateOutBounds: true, // only refresh when move outside of bounds
+    buildIcon: function(data) {
+     // L.Icon.Default();
+      const computeColorClass= (qty) => {
+        if (qty<3) {
+          return 'velib-marker-red'
+        }
+        if (qty<5) {
+          return 'velib-marker-orange'
+        }
+        return 'velib-marker-green'
+      }
+      const opts =  {
+        ...data,
+        ...{
+          name:data.station.name,
+          nbSlots: Math.min(99,data.nbEDock+data.nbEDock),
+          colorBike: computeColorClass(data.nbBike),
+          colorEbike: computeColorClass(data.nbEbike),
+          colorSlots: computeColorClass(data.nbEDock+data.nbEDock),
+        }}
+      return L.divIcon({
+        html: L.Util.template("<div class='velib-marker'>" +
+          "<span class='{colorBike}'><i class='fas fa-fw fa-bicycle'></i>&nbsp;{nbBike}</span>" +
+          "<span class='{colorEbike}'><i class='fas fa-fw fa-motorcycle'></i>&nbsp;{nbEbike}</span>" +
+          "<span class='{colorSlots}'><i class='fas fa-fw fa-parking'></i>&nbsp;{nbSlots}</span>" +
+          "</div>", opts),
+        iconSize: [52, 52],
+        className: 'velib-station-marker'
+      })
+    },
     // buildPopup: function(data) {
-    //   return L.Util.template("<h3>{name}</h3> {data}", {
-    //     name: data.name,
-    //     data: (function() {
-    //       var out = '';
-    //       for(var i=0;i<data.population.length;i++)
-    //         out += L.Util.template(popupTmpl,data.population[i]);
-    //       return out;
-    //     }())
-    //   });
-    // }
+    //   return L.Util.template("<h2>{name}</h2>" +
+    //     "<div style='text-align: center'>" +
+    //     "<h3>{nbBike}&nbsp;<i class='fas fa-bicycle'></i></h3>" +
+    //     "<h3>{nbEbike}&nbsp;<i class=\"fas fa-motorcycle\"></i></h3>" +
+    //     "<h3>{nbSlots}&nbsp;<i class=\"fas fa-parking\"></i></h3>" +
+    //     "</div>", {...data, ...{
+    //       name:data.station.name,
+    //       nbSlots:data.nbEDock+data.nbEDock,
+    //     }});
+    //}
   })
   map.addLayer(layerJSON)
 
