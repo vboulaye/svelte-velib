@@ -125,8 +125,9 @@ export function VelibMap(id, webcom) {
       ...data,
       ...{
         //stats: data.stats?JSON.stringify(data.stats):'nostats',
-        bikeMin: data.stats?data.stats.b.m:0,
-        ebikeMin: data.stats?data.stats.e.m:0,
+        bikeMin: data.stats ? data.stats.b.m : 0,
+        ebikeMin: data.stats ? data.stats.e.m : 0,
+        changedOn: data.stats ? new Date(data.stats.c * 1000).toISOString() : null,
         name: data.station.name,
         nbSlots: Math.min(99, data.nbDock + data.nbEDock - data.nbBike - data.nbEbike),
         colorBike: computeColorClass(data.nbBike),
@@ -134,13 +135,19 @@ export function VelibMap(id, webcom) {
         colorSlots: computeColorClass(data.nbDock + data.nbEDock - data.nbBike - data.nbEbike),
       }
     }
-    opts.nbBikeDisplay=opts.nbBike-opts.bikeMin
-    opts.nbEbikeDisplay=opts.nbEbike-opts.ebikeMin
+    opts.nbBikeDisplay = opts.nbBike - opts.bikeMin
+    opts.nbEbikeDisplay = opts.nbEbike - opts.ebikeMin
+
+    opts.velibBorder = ''
+    if (data.stats && data.stats.c < new Date().getTime()/1000-12*60*60) {
+      opts.velibBorder = 'velib-border-frozen'
+    }
+
     return L.divIcon({
-      html: L.Util.template('<div class="velib-marker">' +
+      html: L.Util.template('<div class="velib-marker {velibBorder}">' +
         '<span class="{colorBike}"><i class="fas fa-fw fa-bicycle" title="min is {bikeMin}"></i>&nbsp;{nbBikeDisplay}</span>' +
         '<span class="{colorEbike}"><i class="fas fa-fw fa-motorcycle" title="min is {ebikeMin}"></i>&nbsp;{nbEbikeDisplay}</span>' +
-        '<span class="{colorSlots}"><i class="fas fa-fw fa-parking"></i>&nbsp;{nbSlots}</span>' +
+        '<span class="{colorSlots}"><i class="fas fa-fw fa-parking" title="dernier mouvement : {changedOn}"></i>&nbsp;{nbSlots}</span>' +
         '</div>', opts),
       iconSize: [52, 52],
       className: 'velib-station-marker'
@@ -177,7 +184,7 @@ export function VelibMap(id, webcom) {
     //}
     dataToMarker: (data, loc) => {
       const marker = layerJSON._defaultDataToMarker(data, loc);
-      setTimeout(()=>
+      setTimeout(() =>
           webcom.child('station.counter').child(data.station.code).child('s')
             .on('value', (snapshot) => {
               const stats = snapshot.val()
@@ -188,7 +195,7 @@ export function VelibMap(id, webcom) {
                 //map.addLayer(marker)
               }
             })
-        ,100)
+        , 100)
       return marker
     },
     onEachMarker: (data, marker) => {

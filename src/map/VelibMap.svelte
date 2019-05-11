@@ -65,6 +65,7 @@
         margin-left: -30px;
         z-index: -1;
     }
+
 </style>
 
 <svelte:head>
