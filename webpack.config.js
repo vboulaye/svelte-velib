@@ -9,7 +9,10 @@ module.exports = {
 		bundle: ['./src/main.js']
 	},
 	resolve: {
-		extensions: ['.mjs', '.js', '.svelte']
+		extensions: ['.mjs', '.js', '.svelte'],
+		alias:{
+			//faye: 'faye/browser/faye-browser' , // alias needed because webpack use the node version
+		}
 	},
 	output: {
 		path: __dirname + '/dist',

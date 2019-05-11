@@ -19,7 +19,7 @@ L.Icon.Default.mergeOptions({
 
 /// end hack
 
-export function VelibMap (id) {
+export function VelibMap(id, webcom) {
 
   const map = L.map(id)
 
@@ -109,6 +109,43 @@ export function VelibMap (id) {
   // loading bloc
   const loader = L.DomUtil.get('loader');
 
+
+  let buildIcon = function (data) {
+    // L.Icon.Default();
+    const computeColorClass = (qty) => {
+      if (qty < 3) {
+        return 'velib-marker-red'
+      }
+      if (qty < 5) {
+        return 'velib-marker-orange'
+      }
+      return 'velib-marker-green'
+    }
+    const opts = {
+      ...data,
+      ...{
+        //stats: data.stats?JSON.stringify(data.stats):'nostats',
+        bikeMin: data.stats?data.stats.b.m:0,
+        ebikeMin: data.stats?data.stats.e.m:0,
+        name: data.station.name,
+        nbSlots: Math.min(99, data.nbDock + data.nbEDock - data.nbBike - data.nbEbike),
+        colorBike: computeColorClass(data.nbBike),
+        colorEbike: computeColorClass(data.nbEbike),
+        colorSlots: computeColorClass(data.nbDock + data.nbEDock - data.nbBike - data.nbEbike),
+      }
+    }
+    opts.nbBikeDisplay=opts.nbBike-opts.bikeMin
+    opts.nbEbikeDisplay=opts.nbEbike-opts.ebikeMin
+    return L.divIcon({
+      html: L.Util.template('<div class="velib-marker">' +
+        '<span class="{colorBike}"><i class="fas fa-fw fa-bicycle" title="min is {bikeMin}"></i>&nbsp;{nbBikeDisplay}</span>' +
+        '<span class="{colorEbike}"><i class="fas fa-fw fa-motorcycle" title="min is {ebikeMin}"></i>&nbsp;{nbEbikeDisplay}</span>' +
+        '<span class="{colorSlots}"><i class="fas fa-fw fa-parking"></i>&nbsp;{nbSlots}</span>' +
+        '</div>', opts),
+      iconSize: [52, 52],
+      className: 'velib-station-marker'
+    })
+  };
   const layerJSON = L.layerJSON({
     url: 'https://www.velib-metropole.fr/webapi/map/details' +
       '?gpsTopLatitude={lat2}' +
@@ -126,37 +163,7 @@ export function VelibMap (id) {
     minZoom: 11, // distance in metter to trigger a refresh call
     minShift: 100, // distance in metter to trigger a refresh call
     updateOutBounds: true, // only refresh when move outside of bounds
-    buildIcon: function (data) {
-      // L.Icon.Default();
-      const computeColorClass = (qty) => {
-        if (qty < 3) {
-          return 'velib-marker-red'
-        }
-        if (qty < 5) {
-          return 'velib-marker-orange'
-        }
-        return 'velib-marker-green'
-      }
-      const opts = {
-        ...data,
-        ...{
-          name: data.station.name,
-          nbSlots: Math.min(99, data.nbDock + data.nbEDock-data.nbBike-data.nbEbike),
-          colorBike: computeColorClass(data.nbBike),
-          colorEbike: computeColorClass(data.nbEbike),
-          colorSlots: computeColorClass(data.nbDock + data.nbEDock-data.nbBike-data.nbEbike),
-        }
-      }
-      return L.divIcon({
-        html: L.Util.template('<div class=\'velib-marker\'>' +
-          '<span class=\'{colorBike}\'><i class=\'fas fa-fw fa-bicycle\'></i>&nbsp;{nbBike}</span>' +
-          '<span class=\'{colorEbike}\'><i class=\'fas fa-fw fa-motorcycle\'></i>&nbsp;{nbEbike}</span>' +
-          '<span class=\'{colorSlots}\'><i class=\'fas fa-fw fa-parking\'></i>&nbsp;{nbSlots}</span>' +
-          '</div>', opts),
-        iconSize: [52, 52],
-        className: 'velib-station-marker'
-      })
-    },
+    buildIcon: buildIcon,
     // buildPopup: function(data) {
     //   return L.Util.template("<h2>{name}</h2>" +
     //     "<div style='text-align: center'>" +
@@ -168,11 +175,32 @@ export function VelibMap (id) {
     //       nbSlots:data.nbEDock+data.nbEDock,
     //     }});
     //}
+    dataToMarker: (data, loc) => {
+      const marker = layerJSON._defaultDataToMarker(data, loc);
+      setTimeout(()=>
+          webcom.child('station.counter').child(data.station.code).child('s')
+            .on('value', (snapshot) => {
+              const stats = snapshot.val()
+              if (stats) {
+                data.stats = stats
+                marker.setIcon(buildIcon(data))
+                //layerJSON.addMarker(data)
+                //map.addLayer(marker)
+              }
+            })
+        ,100)
+      return marker
+    },
+    onEachMarker: (data, marker) => {
+      // if (data.stats) {
+      //   console.log(marker)
+      // }
+    },
   })
-    .on('dataloading',function(e) {
+    .on('dataloading', function (e) {
       loader.style.display = 'block';
     })
-    .on('dataloaded',function(e) {
+    .on('dataloaded', function (e) {
       loader.style.display = 'none';
     })
   map.addLayer(layerJSON)
@@ -180,8 +208,8 @@ export function VelibMap (id) {
   L.control.custom({
     position: 'topleft',
     title: 'refresh',
-    content : '<a class="leaflet-bar-part leaflet-bar-part-single" title="refresh"><i class="fas fa-sync-alt"></i></a>',
-    classes : 'leaflet-control-locate leaflet-bar leaflet-control',
+    content: '<a class="leaflet-bar-part leaflet-bar-part-single" title="refresh"><i class="fas fa-sync-alt"></i></a>',
+    classes: 'leaflet-control-locate leaflet-bar leaflet-control',
     style:
       {
         //margin: '10px',
@@ -190,13 +218,13 @@ export function VelibMap (id) {
       },
     events:
       {
-        click: function(data)
-        {
+        click: function (data) {
           layerJSON.update()
         },
       }
   })
     .addTo(map)
 
-  return { map, markersCluster }
+
+  return {map, markersCluster}
 }

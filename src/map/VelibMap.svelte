@@ -1,6 +1,7 @@
 <script>
   import { onMount } from 'svelte'
   import { VelibMap } from './VelibMap'
+  import VelibWebcom from '../webcom/velib-webcom.js'
 
   const markers = {}
 
@@ -12,8 +13,16 @@
     const lat = urlParams.get('lat') || 48.8294438
     const lon = urlParams.get('lon') || 2.37646
 
-    const velibMap = new VelibMap('map')
-    velibMap.map.setView([lat, lon], zoom)
+
+  // auth and keep trac
+  new VelibWebcom().auth()
+    .then(webcom => {
+
+        const velibMap = new VelibMap('map', webcom)
+        velibMap.map.setView([lat, lon], zoom)
+
+    })
+
 
   })
 
