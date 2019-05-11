@@ -141,10 +141,10 @@ export function VelibMap (id) {
         ...data,
         ...{
           name: data.station.name,
-          nbSlots: Math.min(99, data.nbEDock + data.nbEDock),
+          nbSlots: Math.min(99, data.nbDock + data.nbEDock-data.nbBike-data.nbEbike),
           colorBike: computeColorClass(data.nbBike),
           colorEbike: computeColorClass(data.nbEbike),
-          colorSlots: computeColorClass(data.nbEDock + data.nbEDock),
+          colorSlots: computeColorClass(data.nbDock + data.nbEDock-data.nbBike-data.nbEbike),
         }
       }
       return L.divIcon({
