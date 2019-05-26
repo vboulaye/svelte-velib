@@ -185,9 +185,9 @@ export function VelibMap(id, webcom) {
     dataToMarker: (data, loc) => {
       const marker = layerJSON._defaultDataToMarker(data, loc);
       setTimeout(() =>
-          webcom.child('station.counter').child(data.station.code).child('s')
-            .on('value', (snapshot) => {
-              const stats = snapshot.val()
+              webcom.child('station.counter').child(data.station.code).child('s')
+                .on('value', (snapshot) => {
+                  const stats = snapshot.val()
               if (stats) {
                 data.stats = stats
                 marker.setIcon(buildIcon(data))

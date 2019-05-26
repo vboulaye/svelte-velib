@@ -30,6 +30,11 @@ body {
 	display: block;
 }
 
+.velib-border-frozen {
+	border: 2px solid #ff2b4a;
+	background-color: #cccccc;
+
+}
 
 /*body {*/
 	/*color: #333;*/
