@@ -1,0 +1,8 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">LightVelibApp</string>
+    <string name="title_activity_main">LightVelibApp</string>
+    <string name="package_name">com.vbo.velib</string>
+    <string name="fileprovider_authority">com.vbo.velib.fileprovider</string>
+    <string name="custom_url_scheme">com.vbo.velib</string>
+</resources>

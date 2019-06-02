@@ -1,0 +1,7 @@
+{
+  "appId": "com.vbo.velib",
+  "appName": "LightVelibApp",
+  "bundledWebRuntime": false,
+  "npmClient": "npm",
+  "webDir": "dist"
+}

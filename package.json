@@ -22,6 +22,9 @@
     "deploy": "now dist/"
   },
   "dependencies": {
+    "@capacitor/android": "^1.0.0",
+    "@capacitor/cli": "^1.0.0",
+    "@capacitor/core": "^1.0.0",
     "@fortawesome/fontawesome-free": "^5.8.2",
     "leaflet": "^1.4.0",
     "leaflet-control-custom": "^1.0.0",
