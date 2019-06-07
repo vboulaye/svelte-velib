@@ -1,15 +1,8 @@
-# svelte app
+# Velib Light Map
 
-This is a project template for [Svelte](https://svelte.technology) apps. It lives at https://github.com/sveltejs/template-webpack.
+Une carte simple et efficace qui montre les disponibilités des velibs à Paris.
 
-To create a new project based on this template using [degit](https://github.com/Rich-Harris/degit):
-
-```bash
-npx degit sveltejs/template-webpack svelte-app
-cd svelte-app
-```
-
-*Note that you will need to have [Node.js](https://nodejs.org) installed.*
+Ausi l'occcasion de jouer avec Svelte et Leaflet.
 
 
 ## Get started
@@ -17,7 +10,6 @@ cd svelte-app
 Install the dependencies...
 
 ```bash
-cd svelte-app
 npm install
 ```
 
@@ -32,7 +24,7 @@ Navigate to [localhost:8080](http://localhost:8080). You should see your app run
 
 ## Deploying to the web
 
-### With [now](https://zeit.co/now)
+With [now](https://zeit.co/now)
 
 Install `now` if you haven't already:
 
@@ -43,22 +35,17 @@ npm install -g now
 Then, from within your project folder:
 
 ```bash
-now
+npm run deploy
 ```
 
-As an alternative, use the [Now desktop client](https://zeit.co/download) and simply drag the unzipped project folder to the taskbar icon.
+## Deploying to android with capacitor
 
-### With [surge](https://surge.sh/)
+capacitor is used to build a mobile android app (npx cap init  + npx cap add android to bootstrap the project)
 
-Install `surge` if you haven't already:
+once the webapp is built, sync it with the android project
 
 ```bash
-npm install -g surge
+npx cap sync
 ```
 
-Then, from within your project folder:
-
-```bash
-npm run build
-surge public
-```
+then open the project in the android directory with android studio
