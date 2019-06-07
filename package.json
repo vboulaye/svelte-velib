@@ -27,6 +27,7 @@
     "@capacitor/core": "^1.0.0",
     "@fortawesome/fontawesome-free": "^5.8.2",
     "leaflet": "^1.4.0",
+    "leaflet-bookmarks": "^0.2.5",
     "leaflet-control-custom": "^1.0.0",
     "leaflet-control-geocoder": "^1.7.0",
     "leaflet-layerjson": "^0.3.1",

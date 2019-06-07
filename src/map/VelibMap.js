@@ -4,12 +4,16 @@ import 'leaflet-control-geocoder'
 import 'leaflet.markercluster'
 import 'leaflet-layerjson'
 import 'leaflet-control-custom'
+import 'leaflet-bookmarks'
 
 // hack to repair the marker links from leaflet pssing through webpack
 // https://github.com/Leaflet/Leaflet/issues/4968
 // import 'leaflet/dist/leaflet.css';
 
 delete L.Icon.Default.prototype._getIconUrl
+
+// hide bookmark markers
+L.Control.Bookmarks.prototype._showBookmark = () => {}
 
 L.Icon.Default.mergeOptions({
   iconRetinaUrl: require('leaflet/dist/images/marker-icon-2x.png'),
@@ -24,11 +28,11 @@ export function VelibMap(id, webcom) {
   const map = L.map(id)
 
 // Wikimedia
-  var wikimediaLayer = L.tileLayer('https://maps.wikimedia.org/osm-intl/{z}/{x}/{y}{r}.png', {
+  const wikimediaLayer = L.tileLayer('https://maps.wikimedia.org/osm-intl/{z}/{x}/{y}{r}.png', {
     attribution: '<a href="https://wikimediafoundation.org/wiki/Maps_Terms_of_Use">Wikimedia</a>',
     minZoom: 1,
     maxZoom: 19
-  })
+  });
   wikimediaLayer.addTo(map)
 
 // OpenStreetMap
@@ -41,14 +45,6 @@ export function VelibMap(id, webcom) {
   var satelliteLayer = L.tileLayer('http://services.arcgisonline.com/arcgis/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
     attribution: 'ESRI'
   })
-
-  const mapLink = '<a href="http://openstreetmap.org">OpenStreetMap</a>'
-  const ocmlink = '<a href="http://thunderforest.com/">Thunderforest</a>'
-  const openCycleLayer = L.tileLayer(
-    'http://{s}.tile.thunderforest.com/cycle/{z}/{x}/{y}.png', {
-      attribution: '&copy; ' + mapLink + ' Contributors & ' + ocmlink,
-      maxZoom: 18,
-    })
 
   // Public Transport
   const transportLayer = L.tileLayer('http://openptmap.org/tiles/{z}/{x}/{y}.png', {
@@ -67,7 +63,6 @@ export function VelibMap(id, webcom) {
       'wikimedia': wikimediaLayer,
       'OpenStreetMap': osmLayer,
       'Satellite': satelliteLayer,
-      'OpenCycleMap': openCycleLayer,
     },
     {
       'Transport': transportLayer,
@@ -92,9 +87,18 @@ export function VelibMap(id, webcom) {
     }
   }).addTo(map)
 
+  const bookmarks = new L.Control.Bookmarks({
+    popupOnShow: false,
+    bookmarkTemplate: '<li class="{{ itemClass }}" data-id="{{ data.id }}">' +
+      '<span class="{{ removeClass }}">&times;</span>' +
+      '<span class="{{ nameClass }}">{{ data.name }}</span>' +
+      '</li>',
+    popupTemplate: '<div><h4>{{ name }}</h4></div>',
+  });
+  bookmarks.addTo(map);
+
   // add search by address
-  L.Control.geocoder()
-    .addTo(map)
+  L.Control.geocoder().addTo(map)
 
   // set map area limits
   const southWest = L.latLng(48.74, 2.14)
@@ -139,7 +143,7 @@ export function VelibMap(id, webcom) {
     opts.nbEbikeDisplay = opts.nbEbike - opts.ebikeMin
 
     opts.velibBorder = ''
-    if (data.stats && data.stats.c < new Date().getTime()/1000-12*60*60) {
+    if (data.stats && data.stats.c < new Date().getTime() / 1000 - 12 * 60 * 60) {
       opts.velibBorder = 'velib-border-frozen'
     }
 
@@ -185,15 +189,39 @@ export function VelibMap(id, webcom) {
     dataToMarker: (data, loc) => {
       const marker = layerJSON._defaultDataToMarker(data, loc);
       setTimeout(() =>
-              webcom.child('station.counter').child(data.station.code).child('s')
-                .on('value', (snapshot) => {
-                  const stats = snapshot.val()
+          webcom.child('station.counter').child(data.station.code).child('s')
+            .on('value', (snapshot) => {
+              const stats = snapshot.val()
               if (stats) {
                 data.stats = stats
                 marker.setIcon(buildIcon(data))
                 //layerJSON.addMarker(data)
                 //map.addLayer(marker)
               }
+              let block = false;
+
+              function onContextMenuDebounced() {
+                const bookmarked = bookmarks.getData()
+                  .filter(bookmark => bookmark.id === data.station.code);
+                const eventType = bookmarked[0] ? 'bookmark:remove' : 'bookmark:add';
+                const eventData =  bookmarked[0] || {
+                  id: data.station.code,  // make sure it's unique,
+                  name: data.station.name,
+                  latlng: loc, // important, we're dealing with JSON here,
+                }
+                map.fire(eventType, {data:eventData});
+                block = false;
+              }
+
+              function onContextMenu() {
+                if (!block) {
+                  block = true;
+                  window.setTimeout(onContextMenuDebounced, 300)
+                }
+
+              }
+
+              marker.on('contextmenu', onContextMenu);
             })
         , 100)
       return marker
@@ -233,5 +261,15 @@ export function VelibMap(id, webcom) {
     .addTo(map)
 
 
-  return {map, markersCluster}
+  return {
+    map,
+    markersCluster,
+    bookmarks,
+    getFavorite: () => {
+      const data = bookmarks.getData()
+      if (data && data[0]) {
+        return data[0]
+      }
+    }
+  }
 }

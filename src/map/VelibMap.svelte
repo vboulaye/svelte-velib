@@ -19,7 +19,8 @@
     .then(webcom => {
 
         const velibMap = new VelibMap('map', webcom)
-        velibMap.map.setView([lat, lon], zoom)
+        const favoriteLatLng = (velibMap.getFavorite() || {}).latlng || [lat, lon]
+        velibMap.map.setView(favoriteLatLng, zoom)
 
     })
 
@@ -35,6 +36,7 @@
     @import '~leaflet-control-geocoder/dist/Control.Geocoder.css';
     @import '~leaflet.markercluster/dist/MarkerCluster.css';
     @import '~leaflet.markercluster/dist/MarkerCluster.Default.css';
+    @import '~leaflet-bookmarks/dist/leaflet.bookmarks.css';
 
     #map {
         height: 100%;
