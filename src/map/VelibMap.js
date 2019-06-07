@@ -13,7 +13,8 @@ import 'leaflet-bookmarks'
 delete L.Icon.Default.prototype._getIconUrl
 
 // hide bookmark markers
-L.Control.Bookmarks.prototype._showBookmark = () => {}
+L.Control.Bookmarks.prototype._showBookmark = () => {
+}
 
 L.Icon.Default.mergeOptions({
   iconRetinaUrl: require('leaflet/dist/images/marker-icon-2x.png'),
@@ -204,12 +205,12 @@ export function VelibMap(id, webcom) {
                 const bookmarked = bookmarks.getData()
                   .filter(bookmark => bookmark.id === data.station.code);
                 const eventType = bookmarked[0] ? 'bookmark:remove' : 'bookmark:add';
-                const eventData =  bookmarked[0] || {
+                const eventData = bookmarked[0] || {
                   id: data.station.code,  // make sure it's unique,
                   name: data.station.name,
                   latlng: loc, // important, we're dealing with JSON here,
                 }
-                map.fire(eventType, {data:eventData});
+                map.fire(eventType, {data: eventData});
                 block = false;
               }
 
@@ -226,10 +227,14 @@ export function VelibMap(id, webcom) {
         , 100)
       return marker
     },
+    filterData: (data) => {
+      console.log(data)
+      return data.filter(velibStation => velibStation.station && velibStation.station.state === 'Operative')
+    },
     onEachMarker: (data, marker) => {
       // if (data.stats) {
       //   console.log(marker)
-      // }
+      // } state
     },
   })
     .on('dataloading', function (e) {
