@@ -24,7 +24,7 @@ L.Icon.Default.mergeOptions({
 
 /// end hack
 
-export function VelibMap(id, webcom) {
+export function VelibMap (id, webcom) {
 
   const map = L.map(id)
 
@@ -33,7 +33,7 @@ export function VelibMap(id, webcom) {
     attribution: '<a href="https://wikimediafoundation.org/wiki/Maps_Terms_of_Use">Wikimedia</a>',
     minZoom: 1,
     maxZoom: 19
-  });
+  })
   wikimediaLayer.addTo(map)
 
 // OpenStreetMap
@@ -95,8 +95,8 @@ export function VelibMap(id, webcom) {
       '<span class="{{ nameClass }}">{{ data.name }}</span>' +
       '</li>',
     popupTemplate: '<div><h4>{{ name }}</h4></div>',
-  });
-  bookmarks.addTo(map);
+  })
+  bookmarks.addTo(map)
 
   // add search by address
   L.Control.geocoder().addTo(map)
@@ -112,8 +112,7 @@ export function VelibMap(id, webcom) {
   map.addLayer(markersCluster)
 
   // loading bloc
-  const loader = L.DomUtil.get('loader');
-
+  const loader = L.DomUtil.get('loader')
 
   let buildIcon = function (data) {
     // L.Icon.Default();
@@ -157,7 +156,7 @@ export function VelibMap(id, webcom) {
       iconSize: [52, 52],
       className: 'velib-station-marker'
     })
-  };
+  }
   const layerJSON = L.layerJSON({
     url: 'https://www.velib-metropole.fr/webapi/map/details' +
       '?gpsTopLatitude={lat2}' +
@@ -188,43 +187,45 @@ export function VelibMap(id, webcom) {
     //     }});
     //}
     dataToMarker: (data, loc) => {
-      const marker = layerJSON._defaultDataToMarker(data, loc);
-      setTimeout(() =>
-          webcom.child('station.counter').child(data.station.code).child('s')
-            .on('value', (snapshot) => {
-              const stats = snapshot.val()
-              if (stats) {
-                data.stats = stats
-                marker.setIcon(buildIcon(data))
-                //layerJSON.addMarker(data)
-                //map.addLayer(marker)
-              }
-              let block = false;
-
-              function onContextMenuDebounced() {
-                const bookmarked = bookmarks.getData()
-                  .filter(bookmark => bookmark.id === data.station.code);
-                const eventType = bookmarked[0] ? 'bookmark:remove' : 'bookmark:add';
-                const eventData = bookmarked[0] || {
-                  id: data.station.code,  // make sure it's unique,
-                  name: data.station.name,
-                  latlng: loc, // important, we're dealing with JSON here,
+      const marker = layerJSON._defaultDataToMarker(data, loc)
+      if (webcom) {
+        setTimeout(() =>
+            webcom.child('station.counter').child(data.station.code).child('s')
+              .on('value', (snapshot) => {
+                const stats = snapshot.val()
+                if (stats) {
+                  data.stats = stats
+                  marker.setIcon(buildIcon(data))
+                  //layerJSON.addMarker(data)
+                  //map.addLayer(marker)
                 }
-                map.fire(eventType, {data: eventData});
-                block = false;
-              }
+                let block = false
 
-              function onContextMenu() {
-                if (!block) {
-                  block = true;
-                  window.setTimeout(onContextMenuDebounced, 300)
+                function onContextMenuDebounced () {
+                  const bookmarked = bookmarks.getData()
+                    .filter(bookmark => bookmark.id === data.station.code)
+                  const eventType = bookmarked[0] ? 'bookmark:remove' : 'bookmark:add'
+                  const eventData = bookmarked[0] || {
+                    id: data.station.code,  // make sure it's unique,
+                    name: data.station.name,
+                    latlng: loc, // important, we're dealing with JSON here,
+                  }
+                  map.fire(eventType, { data: eventData })
+                  block = false
                 }
 
-              }
+                function onContextMenu () {
+                  if (!block) {
+                    block = true
+                    window.setTimeout(onContextMenuDebounced, 300)
+                  }
 
-              marker.on('contextmenu', onContextMenu);
-            })
-        , 100)
+                }
+
+                marker.on('contextmenu', onContextMenu)
+              })
+          , 100)
+      }
       return marker
     },
     filterData: (data) => {
@@ -238,10 +239,10 @@ export function VelibMap(id, webcom) {
     },
   })
     .on('dataloading', function (e) {
-      loader.style.display = 'block';
+      loader.style.display = 'block'
     })
     .on('dataloaded', function (e) {
-      loader.style.display = 'none';
+      loader.style.display = 'none'
     })
   map.addLayer(layerJSON)
 
@@ -264,7 +265,6 @@ export function VelibMap(id, webcom) {
       }
   })
     .addTo(map)
-
 
   return {
     map,
