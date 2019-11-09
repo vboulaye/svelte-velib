@@ -3,10 +3,5 @@
   "appName": "LightVelibApp",
   "bundledWebRuntime": false,
   "npmClient": "npm",
-  "webDir": "dist",
-  "plugins": {
-    "SplashScreen":  {
-      "androidScaleType": "CENTER"
-    }
-  }
+  "webDir": "dist"
 }
