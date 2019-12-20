@@ -171,8 +171,8 @@ export function VelibMap (id, webcom) {
       return data.station.code || latlng.toString()
     },
     layerTarget: markersCluster,
-    minZoom: 11, // distance in metter to trigger a refresh call
-    minShift: 100, // distance in metter to trigger a refresh call
+    minZoom: 11, // distance in meter to trigger a refresh call
+    minShift: 100, // distance in meter to trigger a refresh call
     updateOutBounds: true, // only refresh when move outside of bounds
     buildIcon: buildIcon,
     // buildPopup: function(data) {
@@ -188,14 +188,15 @@ export function VelibMap (id, webcom) {
     //}
     dataToMarker: (data, loc) => {
       const marker = layerJSON._defaultDataToMarker(data, loc)
+      marker.data = data;
       if (webcom) {
         setTimeout(() =>
             webcom.child('station.counter').child(data.station.code).child('s')
               .on('value', (snapshot) => {
                 const stats = snapshot.val()
                 if (stats) {
-                  data.stats = stats
-                  marker.setIcon(buildIcon(data))
+                  marker.data.stats = stats;
+                  marker.setIcon(buildIcon(marker.data))
                   //layerJSON.addMarker(data)
                   //map.addLayer(marker)
                 }
@@ -229,13 +230,14 @@ export function VelibMap (id, webcom) {
       return marker
     },
     filterData: (data) => {
-      console.log(data)
+      // console.log(data)
       return data.filter(velibStation => velibStation.station && velibStation.station.state === 'Operative')
     },
     onEachMarker: (data, marker) => {
-      // if (data.stats) {
-      //   console.log(marker)
-      // } state
+      const stats = marker.data.stats // keep the webcom stats
+      marker.data = data // update data from velib
+      marker.data.stats = stats // merge the webcom stats
+      marker.setIcon(buildIcon(marker.data))
     },
   })
     .on('dataloading', function (e) {
