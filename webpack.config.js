@@ -13,6 +13,7 @@ plugins.push(
   ]))
 
 if (!fs.existsSync('src/webcom/webcom-secret.js')) {
+  console.error('using default webcom secret')
   plugins.push(
     new webpack.NormalModuleReplacementPlugin(/(.*)webcom-secret\.js/, function (resource) {
       resource.request = resource.request.replace(/webcom-secret\.js/, `webcom-secret.example.js`)
