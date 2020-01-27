@@ -34,6 +34,6 @@
     "leaflet-layerjson": "^0.3.1",
     "leaflet.locatecontrol": "^0.66.2",
     "leaflet.markercluster": "^1.4.1",
-    "webcom": "2.8.0"
+    "webcom": "^2.9.2"
   }
 }
