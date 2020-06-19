@@ -1,6 +1,7 @@
 {
   "name": "svelte-velib",
   "version": "1.0.0",
+  "license": "MIT",
   "devDependencies": {
     "copy-webpack-plugin": "^5.1.1",
     "cross-env": "^5.2.0",
