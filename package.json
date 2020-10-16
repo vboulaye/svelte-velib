@@ -8,7 +8,7 @@
     "css-loader": "^2.1.1",
     "file-loader": "^3.0.1",
     "mini-css-extract-plugin": "^0.6.0",
-    "now": "^16.7.3",
+    "vercel": "^20.1.2",
     "serve": "^11.3.2",
     "style-loader": "^0.23.1",
     "svelte": "^3.24.0",
@@ -21,7 +21,7 @@
   "scripts": {
     "build": "cross-env NODE_ENV=production webpack",
     "dev": "webpack-dev-server --content-base public",
-    "deploy": "now --prod dist/"
+    "deploy": "vercel --prod dist/"
   },
   "dependencies": {
     "@capacitor/android": "^1.5.2",
