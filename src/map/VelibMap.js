@@ -41,6 +41,7 @@ export function VelibMap (id, webcom) {
     attribution: '&copy; <a href="https://osm.org/copyright">OpenStreetMap</a> contributors',
     maxZoom: 18
   })
+   osmLayer.addTo(map)
 
 // Satellite layer
   var satelliteLayer = L.tileLayer('http://services.arcgisonline.com/arcgis/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
