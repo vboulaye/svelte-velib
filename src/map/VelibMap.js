@@ -29,12 +29,12 @@ export function VelibMap (id, webcom) {
   const map = L.map(id)
 
 // Wikimedia
-  const wikimediaLayer = L.tileLayer('https://maps.wikimedia.org/osm-intl/{z}/{x}/{y}.png', {
-    attribution: '<a href="https://wikimediafoundation.org/wiki/Maps_Terms_of_Use">Wikimedia</a>',
-    minZoom: 1,
-    maxZoom: 19
-  })
-  wikimediaLayer.addTo(map)
+//   const wikimediaLayer = L.tileLayer('https://maps.wikimedia.org/osm-intl/{z}/{x}/{y}.png', {
+//     attribution: '<a href="https://wikimediafoundation.org/wiki/Maps_Terms_of_Use">Wikimedia</a>',
+//     minZoom: 1,
+//     maxZoom: 19
+//   })
+//   wikimediaLayer.addTo(map)
 
 // OpenStreetMap
   const osmLayer = L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
@@ -61,7 +61,7 @@ export function VelibMap (id, webcom) {
 
   L.control.layers(
     {
-      'wikimedia': wikimediaLayer,
+    //  'wikimedia': wikimediaLayer,
       'OpenStreetMap': osmLayer,
       'Satellite': satelliteLayer,
     },
