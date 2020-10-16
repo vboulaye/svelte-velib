@@ -29,7 +29,7 @@ export function VelibMap (id, webcom) {
   const map = L.map(id)
 
 // Wikimedia
-  const wikimediaLayer = L.tileLayer('https://maps.wikimedia.org/osm-intl/{z}/{x}/{y}{r}.png', {
+  const wikimediaLayer = L.tileLayer('https://maps.wikimedia.org/osm-intl/{z}/{x}/{y}.png', {
     attribution: '<a href="https://wikimediafoundation.org/wiki/Maps_Terms_of_Use">Wikimedia</a>',
     minZoom: 1,
     maxZoom: 19
